@@ -24,6 +24,7 @@ export default function TeamMemberPage() {
   const [member, setMember] = useState<TeamMember | null>(null)
   const [sessions, setSessions] = useState<Session[]>([])
   const [fetching, setFetching] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!loading && !user) router.push('/')
@@ -46,6 +47,7 @@ export default function TeamMemberPage() {
         setSessions(s)
       } catch (e) {
         console.error(e)
+        setError('Failed to load team member. Please go back and try again.')
       } finally {
         setFetching(false)
       }
@@ -71,6 +73,15 @@ export default function TeamMemberPage() {
       </div>
     )
   }
+
+  if (error) return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#FDF8F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ color: '#8B3A30', marginBottom: '16px' }}>{error}</p>
+        <Link href="/dashboard" style={{ color: '#A8C5A0', textDecoration: 'underline' }}>← Back to dashboard</Link>
+      </div>
+    </div>
+  )
 
   if (!member) return null
 

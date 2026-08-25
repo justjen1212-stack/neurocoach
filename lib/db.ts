@@ -7,7 +7,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore'
@@ -57,11 +56,15 @@ export async function createTeamMember(
 export async function getTeamMembers(managerId: string): Promise<TeamMember[]> {
   const q = query(
     collection(db, 'teamMembers'),
-    where('managerId', '==', managerId),
-    orderBy('createdAt', 'asc')
+    where('managerId', '==', managerId)
   )
   const snap = await getDocs(q)
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as TeamMember))
+  const members = snap.docs.map((d) => ({ id: d.id, ...d.data() } as TeamMember))
+  return members.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis() ?? 0
+    const bTime = b.createdAt?.toMillis() ?? 0
+    return aTime - bTime
+  })
 }
 
 export async function getTeamMember(memberId: string): Promise<TeamMember | null> {
@@ -110,9 +113,13 @@ export async function getSession(sessionId: string): Promise<Session | null> {
 export async function getSessionsByMember(memberId: string): Promise<Session[]> {
   const q = query(
     collection(db, 'sessions'),
-    where('memberId', '==', memberId),
-    orderBy('createdAt', 'desc')
+    where('memberId', '==', memberId)
   )
   const snap = await getDocs(q)
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session))
+  const sessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session))
+  return sessions.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis() ?? 0
+    const bTime = b.createdAt?.toMillis() ?? 0
+    return bTime - aTime
+  })
 }
