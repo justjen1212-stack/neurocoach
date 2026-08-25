@@ -25,6 +25,13 @@ export interface TeamMember {
 
 export type Framework = 'chemistry' | 'clear' | 'grow' | 'oscar' | 'johari'
 
+export interface SessionFeedback {
+  energyRating: number       // 1–5
+  takeaway: string
+  nextAction: string
+  additionalNotes: string
+}
+
 export interface Session {
   id: string
   managerId: string
@@ -33,6 +40,7 @@ export interface Session {
   sessionNumber: number
   notes: string
   completedQuestions: string[]
+  feedback?: SessionFeedback
   createdAt: Timestamp | null
   updatedAt: Timestamp | null
 }
@@ -96,7 +104,7 @@ export async function createSession(data: {
 
 export async function updateSession(
   sessionId: string,
-  data: Partial<Pick<Session, 'notes' | 'completedQuestions'>>
+  data: Partial<Pick<Session, 'notes' | 'completedQuestions' | 'feedback'>>
 ): Promise<void> {
   await updateDoc(doc(db, 'sessions', sessionId), {
     ...data,

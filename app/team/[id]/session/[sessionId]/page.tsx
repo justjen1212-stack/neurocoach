@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-import { getSession, getTeamMember, updateSession, TeamMember, Session } from '@/lib/db'
+import { getSession, getTeamMember, updateSession, TeamMember, Session, SessionFeedback } from '@/lib/db'
 import { getFramework, FrameworkMeta, Question } from '@/data/questions'
 
 const frameworkColors: Record<string, string> = {
@@ -170,6 +170,14 @@ export default function ActiveSessionPage() {
   const [completedQuestions, setCompletedQuestions] = useState<string[]>([])
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
   const [completing, setCompleting] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedback, setFeedback] = useState<SessionFeedback>({
+    energyRating: 0,
+    takeaway: '',
+    nextAction: '',
+    additionalNotes: '',
+  })
+  const [savingFeedback, setSavingFeedback] = useState(false)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -249,6 +257,21 @@ export default function ActiveSessionPage() {
     setCompleting(true)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     await saveToFirestore(notes, completedQuestions)
+    setCompleting(false)
+    setShowFeedback(true)
+  }
+
+  const handleSubmitFeedback = async () => {
+    setSavingFeedback(true)
+    try {
+      await updateSession(sessionId, { feedback })
+    } catch (e) {
+      console.error(e)
+    }
+    router.push(`/team/${memberId}`)
+  }
+
+  const handleSkipFeedback = () => {
     router.push(`/team/${memberId}`)
   }
 
@@ -261,6 +284,186 @@ export default function ActiveSessionPage() {
   }
 
   if (!member || !session || !framework) return null
+
+  const energyEmojis = ['', '😔', '😐', '🙂', '😊', '🤩']
+  const energyLabels = ['', 'Drained', 'Low', 'Okay', 'Good', 'Energised']
+
+  if (showFeedback) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#FDF8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ width: '100%', maxWidth: '560px' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🌿</div>
+            <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#3D3530', margin: '0 0 8px' }}>
+              Session complete
+            </h1>
+            <p style={{ color: '#7A6F68', fontSize: '15px', margin: 0 }}>
+              Take a moment to capture how {member.name} is leaving this session.
+            </p>
+          </div>
+
+          <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '36px', border: '1px solid #E8E0D8', boxShadow: '0 2px 12px rgba(61,53,48,0.06)' }}>
+
+            {/* Energy check-in */}
+            <div style={{ marginBottom: '28px' }}>
+              <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#3D3530', marginBottom: '6px' }}>
+                How is {member.name} feeling leaving this session?
+              </label>
+              <p style={{ fontSize: '13px', color: '#7A6F68', margin: '0 0 14px' }}>Energy check-in</p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setFeedback((f) => ({ ...f, energyRating: n }))}
+                    style={{
+                      flex: 1,
+                      padding: '12px 6px',
+                      borderRadius: '12px',
+                      border: `2px solid ${feedback.energyRating === n ? '#A8C5A0' : '#E8E0D8'}`,
+                      backgroundColor: feedback.energyRating === n ? '#A8C5A022' : 'transparent',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '4px',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <span style={{ fontSize: '22px' }}>{energyEmojis[n]}</span>
+                    <span style={{ fontSize: '11px', color: '#7A6F68' }}>{energyLabels[n]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Takeaway */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#3D3530', marginBottom: '4px' }}>
+                What was {member.name}&apos;s main takeaway?
+              </label>
+              <p style={{ fontSize: '13px', color: '#7A6F68', margin: '0 0 10px' }}>The thing they most want to hold onto from this session</p>
+              <textarea
+                value={feedback.takeaway}
+                onChange={(e) => setFeedback((f) => ({ ...f, takeaway: e.target.value }))}
+                placeholder="e.g. I realised I work best in short bursts with breaks built in..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #E8E0D8',
+                  fontSize: '14px',
+                  color: '#3D3530',
+                  backgroundColor: '#FDF8F0',
+                  outline: 'none',
+                  resize: 'vertical',
+                  lineHeight: '1.6',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = '#A8C5A0')}
+                onBlur={(e) => (e.target.style.borderColor = '#E8E0D8')}
+              />
+            </div>
+
+            {/* Next action */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#3D3530', marginBottom: '4px' }}>
+                One thing {member.name} will do before the next session
+              </label>
+              <p style={{ fontSize: '13px', color: '#7A6F68', margin: '0 0 10px' }}>Keep it small and specific</p>
+              <textarea
+                value={feedback.nextAction}
+                onChange={(e) => setFeedback((f) => ({ ...f, nextAction: e.target.value }))}
+                placeholder="e.g. Block 30 mins on Tuesday to draft the project brief..."
+                rows={2}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #E8E0D8',
+                  fontSize: '14px',
+                  color: '#3D3530',
+                  backgroundColor: '#FDF8F0',
+                  outline: 'none',
+                  resize: 'vertical',
+                  lineHeight: '1.6',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = '#A8C5A0')}
+                onBlur={(e) => (e.target.style.borderColor = '#E8E0D8')}
+              />
+            </div>
+
+            {/* Additional notes */}
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#3D3530', marginBottom: '4px' }}>
+                Anything else to note? <span style={{ fontWeight: '400', color: '#7A6F68' }}>(optional)</span>
+              </label>
+              <textarea
+                value={feedback.additionalNotes}
+                onChange={(e) => setFeedback((f) => ({ ...f, additionalNotes: e.target.value }))}
+                placeholder="Any observations, things to follow up on, or moments worth remembering..."
+                rows={2}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #E8E0D8',
+                  fontSize: '14px',
+                  color: '#3D3530',
+                  backgroundColor: '#FDF8F0',
+                  outline: 'none',
+                  resize: 'vertical',
+                  lineHeight: '1.6',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = '#A8C5A0')}
+                onBlur={(e) => (e.target.style.borderColor = '#E8E0D8')}
+              />
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handleSkipFeedback}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: '1px solid #E8E0D8',
+                  backgroundColor: '#FDF8F0',
+                  color: '#7A6F68',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                }}
+              >
+                Skip
+              </button>
+              <button
+                onClick={handleSubmitFeedback}
+                disabled={savingFeedback}
+                style={{
+                  flex: 2,
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  backgroundColor: savingFeedback ? '#d4907f' : '#E8A598',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: savingFeedback ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {savingFeedback ? 'Saving...' : 'Save Feedback'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const color = frameworkColors[framework.id] ?? '#A8C5A0'
   const totalQuestions = framework.questions.length
@@ -522,6 +725,43 @@ export default function ActiveSessionPage() {
               }}
             />
           </div>
+
+          {/* Saved feedback summary */}
+          {session.feedback && (
+            <div
+              style={{
+                marginTop: '16px',
+                backgroundColor: '#F0FAF0',
+                borderRadius: '14px',
+                padding: '20px',
+                border: '1px solid #A8C5A0',
+              }}
+            >
+              <p style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: '700', color: '#5A8A52', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Coachee Feedback
+              </p>
+              {session.feedback.energyRating > 0 && (
+                <p style={{ margin: '0 0 8px', fontSize: '14px', color: '#3D3530' }}>
+                  <strong>Energy leaving session:</strong> {['', '😔 Drained', '😐 Low', '🙂 Okay', '😊 Good', '🤩 Energised'][session.feedback.energyRating]}
+                </p>
+              )}
+              {session.feedback.takeaway && (
+                <p style={{ margin: '0 0 8px', fontSize: '14px', color: '#3D3530' }}>
+                  <strong>Main takeaway:</strong> {session.feedback.takeaway}
+                </p>
+              )}
+              {session.feedback.nextAction && (
+                <p style={{ margin: '0 0 8px', fontSize: '14px', color: '#3D3530' }}>
+                  <strong>Next action:</strong> {session.feedback.nextAction}
+                </p>
+              )}
+              {session.feedback.additionalNotes && (
+                <p style={{ margin: 0, fontSize: '14px', color: '#3D3530' }}>
+                  <strong>Notes:</strong> {session.feedback.additionalNotes}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* ND tip */}
           <div
