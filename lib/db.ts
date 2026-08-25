@@ -3,6 +3,7 @@ import {
   doc,
   addDoc,
   updateDoc,
+  deleteDoc,
   getDoc,
   getDocs,
   query,
@@ -81,6 +82,17 @@ export async function getTeamMember(memberId: string): Promise<TeamMember | null
   return { id: snap.id, ...snap.data() } as TeamMember
 }
 
+export async function updateTeamMember(
+  memberId: string,
+  data: Partial<Pick<TeamMember, 'name' | 'role' | 'notes'>>
+): Promise<void> {
+  await updateDoc(doc(db, 'teamMembers', memberId), data)
+}
+
+export async function deleteTeamMember(memberId: string): Promise<void> {
+  await deleteDoc(doc(db, 'teamMembers', memberId))
+}
+
 // ─── Sessions ─────────────────────────────────────────────────────────────────
 
 export async function createSession(data: {
@@ -116,6 +128,10 @@ export async function getSession(sessionId: string): Promise<Session | null> {
   const snap = await getDoc(doc(db, 'sessions', sessionId))
   if (!snap.exists()) return null
   return { id: snap.id, ...snap.data() } as Session
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  await deleteDoc(doc(db, 'sessions', sessionId))
 }
 
 export async function getSessionsByMember(memberId: string): Promise<Session[]> {

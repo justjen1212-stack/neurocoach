@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-import { getSession, getTeamMember, updateSession, TeamMember, Session, SessionFeedback } from '@/lib/db'
+import { getSession, getTeamMember, updateSession, deleteSession, TeamMember, Session, SessionFeedback } from '@/lib/db'
 import { getFramework, FrameworkMeta, Question } from '@/data/questions'
 
 const frameworkColors: Record<string, string> = {
@@ -172,6 +172,8 @@ export default function ActiveSessionPage() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
   const [completing, setCompleting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [feedback, setFeedback] = useState<SessionFeedback>({
     energyRating: 0,
     takeaway: '',
@@ -274,6 +276,17 @@ export default function ActiveSessionPage() {
 
   const handleSkipFeedback = () => {
     router.push(`/team/${memberId}`)
+  }
+
+  const handleDeleteSession = async () => {
+    setDeleting(true)
+    try {
+      await deleteSession(sessionId)
+      router.push(`/team/${memberId}`)
+    } catch (e) {
+      console.error(e)
+      setDeleting(false)
+    }
   }
 
   if (loading || !user || fetching) {
@@ -487,6 +500,28 @@ export default function ActiveSessionPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDF8F0' }}>
+      {/* Delete confirmation modal */}
+      {confirmDelete && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(61,53,48,0.4)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '36px', maxWidth: '420px', width: '100%', boxShadow: '0 8px 32px rgba(61,53,48,0.15)' }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: '20px', fontWeight: '700', color: '#3D3530' }}>Delete this session?</h2>
+            <p style={{ color: '#7A6F68', fontSize: '14px', margin: '0 0 24px', lineHeight: '1.6' }}>
+              All notes, question progress, and feedback will be permanently deleted.
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setConfirmDelete(false)}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #E8E0D8', backgroundColor: '#FDF8F0', color: '#3D3530', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleDeleteSession} disabled={deleting}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', backgroundColor: '#E8A598', color: 'white', fontSize: '14px', fontWeight: '600', cursor: deleting ? 'not-allowed' : 'pointer' }}>
+                {deleting ? 'Deleting...' : 'Yes, delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header
         style={{
@@ -528,6 +563,12 @@ export default function ActiveSessionPage() {
             {saveStatus === 'saved' ? '✓ Saved' : saveStatus === 'saving' ? '⏳ Saving...' : '● Unsaved'}
           </span>
 
+          <button
+            onClick={() => setConfirmDelete(true)}
+            style={{ background: 'none', border: '1px solid #E8E0D8', borderRadius: '10px', padding: '10px 16px', color: '#7A6F68', fontSize: '14px', cursor: 'pointer' }}
+          >
+            Delete
+          </button>
           <button
             onClick={handleCompleteSession}
             disabled={completing}
