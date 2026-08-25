@@ -23,6 +23,8 @@ const frameworkColors: Record<string, string> = {
   oscar: '#F0C882',
   johari: '#E8A598',
   resolution: '#A0B8C8',
+  adjustments: '#C8A8D4',
+  wellbeing: '#A0C8B8',
 }
 
 export default function TeamMemberPage() {

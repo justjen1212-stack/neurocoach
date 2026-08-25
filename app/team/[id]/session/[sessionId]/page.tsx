@@ -14,6 +14,8 @@ const frameworkColors: Record<string, string> = {
   oscar: '#F0C882',
   johari: '#E8A598',
   resolution: '#A0B8C8',
+  adjustments: '#C8A8D4',
+  wellbeing: '#A0C8B8',
 }
 
 function NDTooltip({ note }: { note: string }) {
@@ -834,6 +836,8 @@ export default function ActiveSessionPage() {
               {framework.id === 'oscar' && 'Think in terms of sustainable growth, not rapid change. Small, consistent steps beat ambitious leaps.'}
               {framework.id === 'johari' && 'Go gently into the blind spots and hidden areas. This is deep self-awareness work — take your time.'}
               {framework.id === 'resolution' && 'Capability before conduct. Most AuDHD performance concerns are about barriers, not behaviour. Lead with curiosity and support — formal processes are the last resort, not the first.'}
+              {framework.id === 'adjustments' && 'No diagnosis is required to act. If you can observe the barrier, you can address it. The best adjustment is the one the employee helped design — not the one you assumed would help.'}
+              {framework.id === 'wellbeing' && 'Masking costs energy. An AuDHD employee who appears "fine" may be expending enormous effort to look that way. A genuine check-in — not a tick-box — is one of the most protective things a manager can do.'}
             </p>
           </div>
         </div>

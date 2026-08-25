@@ -24,7 +24,7 @@ export interface TeamMember {
   createdAt: Timestamp | null
 }
 
-export type Framework = 'chemistry' | 'clear' | 'grow' | 'oscar' | 'johari' | 'resolution'
+export type Framework = 'chemistry' | 'clear' | 'grow' | 'oscar' | 'johari' | 'resolution' | 'adjustments' | 'wellbeing'
 
 export interface SessionFeedback {
   energyRating: number       // 1–5
