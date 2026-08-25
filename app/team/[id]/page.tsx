@@ -13,6 +13,7 @@ const frameworkColors: Record<string, string> = {
   grow: '#A8C5A0',
   oscar: '#F0C882',
   johari: '#E8A598',
+  resolution: '#A0B8C8',
 }
 
 export default function TeamMemberPage() {

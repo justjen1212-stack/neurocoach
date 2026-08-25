@@ -332,7 +332,112 @@ const johariQuestions: Question[] = [
   },
 ]
 
-// ─── Framework Registry ───────────────────────────────────────────────────────
+// ─── Early Resolution ─────────────────────────────────────────────────────────
+
+const resolutionQuestions: Question[] = [
+  // Understand the situation
+  {
+    id: 'res_u1',
+    section: 'Understand First',
+    text: "What's actually changed recently — in workload, environment, team dynamics, or their personal circumstances?",
+    nd_note: 'ACAS research: issues often have a root cause that informal conversations can surface before formal action is needed. AuDHD individuals are especially sensitive to environmental and routine changes.',
+  },
+  {
+    id: 'res_u2',
+    section: 'Understand First',
+    text: 'Is this a capability issue (something getting in the way of performance) or a conduct issue (a deliberate choice being made)?',
+    nd_note: 'ACAS finding: employers often conflate capability and misconduct. For AuDHD staff, what looks like conduct is frequently capability — executive dysfunction, sensory overload, or burnout.',
+  },
+  {
+    id: 'res_u3',
+    section: 'Understand First',
+    text: 'Have you had any informal conversation about this yet? If so, what happened — and if not, what has held you back?',
+    nd_note: 'ACAS finding: close-relationship avoidance is the most common reason issues escalate. Naming the avoidance is the first step to addressing it.',
+  },
+  {
+    id: 'res_u4',
+    section: 'Understand First',
+    text: 'What does the person themselves understand about the current situation? Have expectations been made fully explicit — not just assumed?',
+    nd_note: 'AuDHD individuals often miss implied expectations entirely. ACAS research shows staff rarely read policies — explicit verbal clarity is essential.',
+  },
+  // Before the conversation
+  {
+    id: 'res_b1',
+    section: 'Before the Conversation',
+    text: 'What support or adjustments could you offer that might resolve this before a formal process is needed?',
+    nd_note: 'ACAS guidance: capability issues should be met with support first. For AuDHD staff this might mean workload adjustments, task restructuring, or communication format changes.',
+  },
+  {
+    id: 'res_b2',
+    section: 'Before the Conversation',
+    text: 'What is the one specific, concrete change you are asking for — and is it genuinely realistic given their current capacity?',
+    nd_note: 'Vague asks ("just try harder") are particularly unhelpful for AuDHD individuals. Specific, measurable asks reduce confusion and increase the chance of success.',
+  },
+  {
+    id: 'res_b3',
+    section: 'Before the Conversation',
+    text: 'Have you told this person clearly — not just implied — that the current situation cannot continue?',
+    nd_note: 'ACAS finding: informal conversations are often too superficial. AuDHD individuals may not pick up on softened or indirect framing as a serious concern.',
+  },
+  {
+    id: 'res_b4',
+    section: 'Before the Conversation',
+    text: 'What would a fair outcome look like for both of you — not just for the organisation?',
+    nd_note: 'ACAS research shows that perceived fairness of process is as important as the outcome. This question helps coaches hold both perspectives.',
+  },
+  // Having the conversation
+  {
+    id: 'res_c1',
+    section: 'Having the Conversation',
+    text: 'How will you open the conversation in a way that feels safe, not threatening — so they can actually hear what you are saying?',
+    nd_note: 'AuDHD individuals in threat-detection mode cannot process feedback effectively. Opening with curiosity and care makes the conversation productive rather than defensive.',
+  },
+  {
+    id: 'res_c2',
+    section: 'Having the Conversation',
+    text: 'What format will work best for them — in-person, written first, or a blend?',
+    nd_note: 'Many AuDHD individuals process written information better than verbal in high-stress situations. Offering a written summary after a verbal conversation supports clarity.',
+  },
+  {
+    id: 'res_c3',
+    section: 'Having the Conversation',
+    text: 'How will you make space for them to share their perspective — not just receive yours?',
+    nd_note: 'ACAS finding: one-sided conversations breed grievances. For AuDHD individuals who may need processing time, signposting that their response matters (even if it comes later) is important.',
+  },
+  {
+    id: 'res_c4',
+    section: 'Having the Conversation',
+    text: 'What does success look like in 2 weeks? What small, observable change would tell you things are improving?',
+    nd_note: 'Specific, short-horizon markers are more manageable than open-ended expectations, especially for ADHD brains prone to time-blindness.',
+  },
+  // Escalation awareness
+  {
+    id: 'res_e1',
+    section: 'Escalation Awareness',
+    text: 'At what point — and under what specific circumstances — would you consider moving to a formal process?',
+    nd_note: 'ACAS guidance: having a clear threshold in mind prevents both premature escalation and delayed action. Uncertainty here often leads to costly settlements.',
+  },
+  {
+    id: 'res_e2',
+    section: 'Escalation Awareness',
+    text: 'Is mediation worth exploring — especially if the relationship itself has broken down, not just the task performance?',
+    nd_note: 'ACAS finding: mediation is vastly underused in SMEs. It is especially effective when communication breakdown (rather than gross misconduct) is at the root of the issue.',
+  },
+  {
+    id: 'res_e3',
+    section: 'Escalation Awareness',
+    text: 'Are you keeping adequate records of conversations, agreed actions, and support offered — in case this needs to go further?',
+    nd_note: 'ACAS finding: poor record-keeping is a consistent vulnerability for SMEs at tribunal. Even informal conversations should have a brief written follow-up.',
+  },
+  {
+    id: 'res_e4',
+    section: 'Escalation Awareness',
+    text: 'Do you have access to HR support or advice if this escalates — and do you know when to use it?',
+    nd_note: 'ACAS research: manager confidence in handling disputes is the strongest predictor of good outcomes. Knowing when to seek advice is itself a skill.',
+  },
+]
+
+
 
 export const frameworks: FrameworkMeta[] = [
   {
@@ -378,6 +483,15 @@ export const frameworks: FrameworkMeta[] = [
     whenToUse: 'When exploring identity, masking, and authentic self at work.',
     sections: ['Open Area', 'Blind Spot', 'Hidden Area', 'Unknown Area'],
     questions: johariQuestions,
+  },
+  {
+    id: 'resolution',
+    name: 'Early Resolution',
+    emoji: '🤝',
+    description: 'ACAS-informed framework for navigating performance concerns, difficult conversations, and early dispute prevention — before issues escalate.',
+    whenToUse: 'When there is a performance, conduct, or relationship concern that needs addressing. Use this before reaching for a formal process.',
+    sections: ['Understand First', 'Before the Conversation', 'Having the Conversation', 'Escalation Awareness'],
+    questions: resolutionQuestions,
   },
 ]
 

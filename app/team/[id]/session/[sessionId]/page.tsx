@@ -13,6 +13,7 @@ const frameworkColors: Record<string, string> = {
   grow: '#A8C5A0',
   oscar: '#F0C882',
   johari: '#E8A598',
+  resolution: '#A0B8C8',
 }
 
 function NDTooltip({ note }: { note: string }) {
@@ -791,6 +792,7 @@ export default function ActiveSessionPage() {
               {framework.id === 'grow' && 'Focus on barriers, not blame. "What got in the way?" is always more useful than "why didn\'t you...?"'}
               {framework.id === 'oscar' && 'Think in terms of sustainable growth, not rapid change. Small, consistent steps beat ambitious leaps.'}
               {framework.id === 'johari' && 'Go gently into the blind spots and hidden areas. This is deep self-awareness work — take your time.'}
+              {framework.id === 'resolution' && 'Capability before conduct. Most AuDHD performance concerns are about barriers, not behaviour. Lead with curiosity and support — formal processes are the last resort, not the first.'}
             </p>
           </div>
         </div>
